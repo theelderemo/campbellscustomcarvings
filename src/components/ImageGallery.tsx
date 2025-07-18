@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
@@ -31,10 +32,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
               setOpen(true);
             }}
           >
-            <img
+            <Image
               src={src}
               alt={`Gallery image ${idx + 1}`}
+              width={400}
+              height={192}
               className="w-full h-48 object-cover object-center"
+              priority={idx === 0}
             />
           </button>
         ))}

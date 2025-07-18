@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+// ...existing code...
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";

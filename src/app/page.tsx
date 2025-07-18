@@ -1,18 +1,18 @@
+import ImageGallery from "@/components/ImageGallery";
 
-import ImageGallery from "../components/ImageGallery";
-
+// Manually selected images for the homepage gallery
 const images = [
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80",
+  "https://mwczjsxnarjgrgozxcxi.supabase.co/storage/v1/object/public/product-images//DeadorAlive.jpg",
+  "https://mwczjsxnarjgrgozxcxi.supabase.co/storage/v1/object/public/product-images//group.jpg",
+  // Add as many URLs as you want
 ];
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="p-8 md:p-12 max-w-5xl mx-auto">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold text-center mb-8 text-white">
+        Our Finest Work
+      </h1>
       <ImageGallery images={images} />
     </div>
   );
