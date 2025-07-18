@@ -1,10 +1,9 @@
 import ImageGallery from "@/components/ImageGallery";
 
-// Manually selected images for the homepage gallery
 const images = [
   "https://mwczjsxnarjgrgozxcxi.supabase.co/storage/v1/object/public/product-images//DeadorAlive.jpg",
   "https://mwczjsxnarjgrgozxcxi.supabase.co/storage/v1/object/public/product-images//group.jpg",
-  // Add as many URLs as you want
+  "https://mwczjsxnarjgrgozxcxi.supabase.co/storage/v1/object/public/product-images//HeartSmile.jpg",
 ];
 
 export default function HomePage() {
