@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
         set: (name, value, options) => {
           response.cookies.set(name, value, options);
         },
-        remove: (name, options) => {
+        remove: (name) => {
           response.cookies.delete(name);
         },
       },

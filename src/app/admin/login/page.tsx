@@ -30,7 +30,7 @@ export default function AdminLogin() {
       if (data.user) {
         router.push('/admin');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);

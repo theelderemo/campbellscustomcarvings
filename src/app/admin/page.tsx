@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { Order } from '@/lib/types';
 
 interface DashboardStats {
   totalProducts: number;
   totalOrders: number;
   totalCustomOrders: number;
-  recentOrders: any[];
+  recentOrders: Order[];
 }
 
 export default function AdminDashboard() {
@@ -97,7 +98,7 @@ export default function AdminDashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-2 text-gray-600">
-          Welcome to your admin dashboard. Here's an overview of your business.
+          Welcome to your admin dashboard. Here&apos;s an overview of your business.
         </p>
       </div>
 
@@ -160,7 +161,7 @@ export default function AdminDashboard() {
                         {order.customer_name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {order.products?.name || 'N/A'}
+                        {order.product?.name || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         ${order.total_amount}
