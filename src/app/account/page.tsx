@@ -5,9 +5,10 @@ import { supabase } from '@/lib/supabase/client';
 import { getUserProfile } from '@/lib/actions';
 import { UserProfile, Order, CustomOrder } from '@/lib/types';
 import { useRouter } from 'next/navigation';
+import { User } from '@supabase/supabase-js'; // Import the User type
 
 export default function AccountPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null); // Correctly type the user state
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [customOrders, setCustomOrders] = useState<CustomOrder[]>([]);
@@ -17,14 +18,14 @@ export default function AccountPage() {
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         router.push('/');
         return;
       }
 
       setUser(user);
-      
+
       // Get user profile
       const profile = await getUserProfile(user.id);
       setUserProfile(profile);
@@ -83,8 +84,8 @@ export default function AccountPage() {
               {userProfile && (
                 <div className="mt-2">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    userProfile.role === 'admin' 
-                      ? 'bg-purple-100 text-purple-800' 
+                    userProfile.role === 'admin'
+                      ? 'bg-purple-100 text-purple-800'
                       : 'bg-blue-100 text-blue-800'
                   }`}>
                     {userProfile.role}
