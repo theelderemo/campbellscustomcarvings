@@ -12,3 +12,32 @@ export async function createSupabaseServerClient() {
     },
   });
 }
+
+/**
+ * Server-side function to check if the current user has admin role
+ */
+export async function checkAdminRoleServer(): Promise<boolean> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return false;
+    }
+
+    const { data: userProfile, error } = await supabase
+      .from('user_profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (error || !userProfile) {
+      return false;
+    }
+
+    return userProfile.role === 'admin';
+  } catch (error) {
+    console.error('Error checking admin role:', error);
+    return false;
+  }
+}

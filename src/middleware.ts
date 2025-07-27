@@ -35,9 +35,33 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
+  // If user is authenticated and accessing admin routes (except login), check admin role
+  if (request.nextUrl.pathname.startsWith('/admin') && 
+      request.nextUrl.pathname !== '/admin/login' && 
+      user) {
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!userProfile || userProfile.role !== 'admin') {
+      return NextResponse.redirect(new URL('/admin/login?error=unauthorized', request.url));
+    }
+  }
+
   // If authenticated and trying to access login page, redirect to admin dashboard
   if (request.nextUrl.pathname === '/admin/login' && user) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+    // Check if user is admin before redirecting
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (userProfile && userProfile.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
   }
 
   return response;

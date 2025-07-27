@@ -34,3 +34,15 @@ export type CustomOrder = {
   notes: string | null;
   images: string[] | null;
 };
+
+export type UserProfile = {
+  id: string;
+  user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  role: 'admin' | 'customer';
+  created_at: string;
+  updated_at: string;
+};

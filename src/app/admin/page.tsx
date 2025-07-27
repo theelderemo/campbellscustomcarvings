@@ -2,7 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { checkAdminRole } from '@/lib/actions';
 import { Order } from '@/lib/types';
+import AdminProtected from '@/components/admin/AdminProtected';
+import AdminTest from '@/components/admin/AdminTest';
 
 interface DashboardStats {
   totalProducts: number;
@@ -11,7 +14,7 @@ interface DashboardStats {
   recentOrders: Order[];
 }
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     totalOrders: 0,
@@ -23,6 +26,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        // Verify admin access first
+        const isAdmin = await checkAdminRole();
+        if (!isAdmin) {
+          return;
+        }
+
         // Fetch products count
         const { count: productsCount } = await supabase
           .from('products')
@@ -100,6 +109,11 @@ export default function AdminDashboard() {
         <p className="mt-2 text-gray-600">
           Welcome to your admin dashboard. Here&apos;s an overview of your business.
         </p>
+      </div>
+
+      {/* Admin Test Component - Remove in production */}
+      <div className="mb-8">
+        <AdminTest />
       </div>
 
       {/* Stats Cards */}
@@ -193,5 +207,13 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <AdminProtected>
+      <AdminDashboardContent />
+    </AdminProtected>
   );
 }

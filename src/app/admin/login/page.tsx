@@ -1,15 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { signInUser, signUpUser } from '@/lib/actions';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'unauthorized') {
+      setError('You do not have admin privileges to access this area.');
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,19 +27,43 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const result = await signInUser(email, password);
 
-      if (error) {
-        setError(error.message);
+      if (!result.success) {
+        setError(result.error || 'Login failed');
         return;
       }
 
-      if (data.user) {
-        router.push('/admin');
+      if (!result.isAdmin) {
+        setError('You do not have admin privileges to access this area.');
+        await supabase.auth.signOut();
+        return;
       }
+
+      router.push('/admin');
+    } catch {
+      setError('An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await signUpUser(email, password, 'admin');
+
+      if (!result.success) {
+        setError(result.error || 'Registration failed');
+        return;
+      }
+
+      setError('');
+      alert('Admin account created successfully! Please sign in.');
+      setIsRegistering(false);
     } catch {
       setError('An unexpected error occurred');
     } finally {
@@ -42,13 +76,16 @@ export default function AdminLogin() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Admin Login
+            {isRegistering ? 'Create Admin Account' : 'Admin Login'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to access the admin dashboard
+            {isRegistering 
+              ? 'Create a new admin account to manage the store'
+              : 'Sign in to access the admin dashboard'
+            }
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        <form className="mt-8 space-y-6" onSubmit={isRegistering ? handleRegister : handleLogin}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -96,7 +133,26 @@ export default function AdminLogin() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading 
+                ? (isRegistering ? 'Creating account...' : 'Signing in...') 
+                : (isRegistering ? 'Create Admin Account' : 'Sign in')
+              }
+            </button>
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegistering(!isRegistering);
+                setError('');
+              }}
+              className="text-indigo-600 hover:text-indigo-500 text-sm font-medium"
+            >
+              {isRegistering 
+                ? 'Already have an account? Sign in' 
+                : 'Need to create an admin account? Register'
+              }
             </button>
           </div>
         </form>

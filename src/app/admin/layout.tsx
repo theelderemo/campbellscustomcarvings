@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
+import { checkAdminRole } from '@/lib/actions';
 import type { User } from '@supabase/supabase-js';
 
 export default function AdminLayout({
@@ -15,22 +16,45 @@ export default function AdminLayout({
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      
+      if (user) {
+        const adminCheck = await checkAdminRole();
+        setIsAdmin(adminCheck);
+        
+        if (!adminCheck) {
+          router.push('/admin/login?error=unauthorized');
+          return;
+        }
+      }
+      
       setLoading(false);
     };
 
     getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        const adminCheck = await checkAdminRole();
+        setIsAdmin(adminCheck);
+        
+        if (!adminCheck) {
+          router.push('/admin/login?error=unauthorized');
+        }
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -45,7 +69,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     router.push('/admin/login');
     return null;
   }
