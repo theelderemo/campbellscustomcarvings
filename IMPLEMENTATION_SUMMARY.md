@@ -94,40 +94,5 @@ CREATE TABLE user_profiles (
 );
 ```
 
-### 🚀 **How to Use**
 
-#### **Setup:**
-1. Run the SQL script: `supabase-user-profiles-setup.sql`
-2. Start the development server: `npm run dev`
-
-#### **Create Admin:**
-```sql
--- Method 1: Via navbar registration + manual role update
-UPDATE user_profiles SET role = 'admin' WHERE email = 'admin@example.com';
-
--- Method 2: Via admin login page (creates admin role automatically)
-```
-
-#### **User Experience:**
-1. **Customer Journey**: Sign up → Auto redirect to `/account` → View orders
-2. **Admin Journey**: Sign up → Manual role change → Access `/admin` → Manage store
-
-### ✨ **Key Benefits**
-
-- **Seamless UX**: No separate login pages needed for customers
-- **Role Flexibility**: Easy to switch between admin and customer roles
-- **Security First**: Multiple layers of protection
-- **Mobile Friendly**: Responsive design for all screen sizes
-- **Real-time Updates**: Auth state synced across components
-
-## 🎉 **Ready for Production!**
-
-The system now provides:
-- ✅ Secure admin dashboard with role-based access
-- ✅ Customer account area with order tracking
-- ✅ Integrated navbar authentication
-- ✅ Mobile-responsive design
-- ✅ Comprehensive security measures
-- ✅ Easy setup and maintenance
-
-**Next Steps**: Configure your Supabase database and start managing your custom carving business! 🪵✨
+**Next Steps**: Configure Supabase database and start managing custom carving  🪵✨
