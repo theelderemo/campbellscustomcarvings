@@ -1,3 +1,5 @@
+// src/lib/actions.ts
+
 import { supabase } from './supabase/client';
 import { UserProfile } from './types';
 
@@ -80,7 +82,14 @@ export async function upsertUserProfile(profile: Partial<UserProfile>): Promise<
 /**
  * Sign up a new user and create their profile
  */
-export async function signUpUser(email: string, password: string, role: 'admin' | 'customer' = 'customer'): Promise<{ success: boolean; error?: string }> {
+export async function signUpUser(
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string,
+  phone: string,
+  role: 'admin' | 'customer' = 'customer'
+): Promise<{ success: boolean; error?: string }> {
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -97,8 +106,9 @@ export async function signUpUser(email: string, password: string, role: 'admin' 
         user_id: data.user.id,
         email: data.user.email!,
         role,
-        first_name: '',
-        last_name: '',
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone,
       });
 
       if (!profileResult) {
@@ -111,6 +121,7 @@ export async function signUpUser(email: string, password: string, role: 'admin' 
     return { success: false, error: 'An unexpected error occurred' };
   }
 }
+
 
 /**
  * Sign in user and check admin role
