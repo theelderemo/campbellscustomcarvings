@@ -95,12 +95,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    UPDATE user_profiles SET role = 'admin' WHERE email = 'your-admin-email@example.com';
    ```
 
-#### Option B: Create Admin via Admin Login Page
-1. Navigate to `/admin/login`
-2. Click "Need to create an admin account? Register"
-3. Enter email and password
-4. The account will be created with admin role automatically
-
 ### 4. User Access
 - **Admins**: Can access `/admin` dashboard and all admin features
 - **Customers**: Can access `/account` page to view their orders and requests
