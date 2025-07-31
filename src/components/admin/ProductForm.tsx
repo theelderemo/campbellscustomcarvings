@@ -111,7 +111,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
             type="text"
             id="name"
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
           />
@@ -124,7 +124,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
           <textarea
             id="description"
             rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           />
@@ -141,7 +141,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               step="0.01"
               min="0"
               required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
               value={formData.price}
               onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
             />
@@ -154,7 +154,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
             <input
               type="text"
               id="material"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
               value={formData.material}
               onChange={(e) => setFormData(prev => ({ ...prev, material: e.target.value }))}
               placeholder="e.g., Oak, Pine, Cherry"
@@ -172,7 +172,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
             <input
               type="url"
               placeholder="Enter image URL"
-              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
             />
