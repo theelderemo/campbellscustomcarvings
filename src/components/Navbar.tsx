@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Import the router
 import { supabase } from "@/lib/supabase/client";
 import { getUserProfile } from "@/lib/actions";
 import AuthModal from "./AuthModal";
@@ -15,6 +16,7 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); // Initialize the router
 
   useEffect(() => {
     const getUser = async () => {
@@ -49,6 +51,7 @@ export default function Navbar() {
     await supabase.auth.signOut();
     setUser(null);
     setUserProfile(null);
+    router.push('/'); // Add this line to redirect to the homepage
   };
 
   const handleAuthSuccess = () => {

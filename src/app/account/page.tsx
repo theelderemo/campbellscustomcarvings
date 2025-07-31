@@ -5,10 +5,10 @@ import { supabase } from '@/lib/supabase/client';
 import { getUserProfile } from '@/lib/actions';
 import { UserProfile, Order, CustomOrder } from '@/lib/types';
 import { useRouter } from 'next/navigation';
-import { User } from '@supabase/supabase-js'; // Import the User type
+import { User } from '@supabase/supabase-js';
 
 export default function AccountPage() {
-  const [user, setUser] = useState<User | null>(null); // Correctly type the user state
+  const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [customOrders, setCustomOrders] = useState<CustomOrder[]>([]);
@@ -30,7 +30,7 @@ export default function AccountPage() {
       const profile = await getUserProfile(user.id);
       setUserProfile(profile);
 
-      // Fetch user's orders
+      // Fetch user's orders using user.id
       const { data: userOrders } = await supabase
         .from('orders')
         .select(`
@@ -41,10 +41,10 @@ export default function AccountPage() {
             price
           )
         `)
-        .eq('customer_email', user.email)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      // Fetch user's custom orders
+      // Fetch user's custom orders using user.email
       const { data: userCustomOrders } = await supabase
         .from('custom_orders')
         .select('*')
