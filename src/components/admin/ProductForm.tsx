@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/lib/types';
 
@@ -19,6 +19,9 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   });
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [uploadMode, setUploadMode] = useState<'url' | 'file'>('url');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (product) {
@@ -71,13 +74,81 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
     }
   };
 
-  const handleAddImage = () => {
+  const handleAddImageUrl = () => {
     if (imageUrl.trim()) {
       setFormData(prev => ({
         ...prev,
         images: [...prev.images, imageUrl.trim()]
       }));
       setImageUrl('');
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      setUploading(true);
+      
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `product-images/${fileName}`;
+
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Upload error:', error);
+        throw error;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image. Please try again.');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please select a valid image file (JPEG, PNG, or WebP)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    const imageUrl = await uploadImage(file);
+    if (imageUrl) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, imageUrl]
+      }));
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -166,28 +237,98 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Product Images
           </label>
-          
-          {/* Add new image */}
-          <div className="flex gap-2 mb-4">
-            <input
-              type="url"
-              placeholder="Enter image URL"
-              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900 bg-white placeholder-gray-400"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-            />
+
+          {/* Image Upload Mode Toggle */}
+          <div className="flex space-x-1 rounded-lg bg-gray-100 p-1 mb-4">
             <button
               type="button"
-              onClick={handleAddImage}
-              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+              onClick={() => setUploadMode('url')}
+              className={`flex-1 rounded-md py-2 px-3 text-sm font-medium transition-colors ${
+                uploadMode === 'url'
+                  ? 'bg-white text-gray-900 shadow'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
             >
-              Add
+              Image URL
+            </button>
+            <button
+              type="button"
+              onClick={() => setUploadMode('file')}
+              className={`flex-1 rounded-md py-2 px-3 text-sm font-medium transition-colors ${
+                uploadMode === 'file'
+                  ? 'bg-white text-gray-900 shadow'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Upload File
             </button>
           </div>
+          
+          {/* Add new image - URL mode */}
+          {uploadMode === 'url' && (
+            <div className="flex gap-2 mb-4">
+              <input
+                type="url"
+                placeholder="Enter image URL"
+                className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900 bg-white placeholder-gray-400"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={handleAddImageUrl}
+                disabled={!imageUrl.trim()}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add URL
+              </button>
+            </div>
+          )}
+
+          {/* Add new image - File upload mode */}
+          {uploadMode === 'file' && (
+            <div className="mb-4">
+              <div className="flex items-center justify-center w-full">
+                <label
+                  htmlFor="file-upload"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    {uploading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                        <span className="text-sm text-gray-500">Uploading...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span>
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG, JPEG or WebP (MAX. 5MB)</p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    id="file-upload"
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+            </div>
+          )}
 
           {/* Display current images */}
           {formData.images.length > 0 && (
             <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-700">Current Images:</h4>
               {formData.images.map((image, index) => (
                 <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                   <img
@@ -203,7 +344,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-600 hover:text-red-800 text-sm font-medium"
                   >
                     Remove
                   </button>
@@ -223,7 +364,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
