@@ -125,7 +125,7 @@ function AdminDashboardContent() {
           >
             <div className="flex items-center">
               <div className={`rounded-md p-3 ${stat.color}`}>
-                <span className="text-2xl text-white">{stat.icon}</span>
+                <span className="text-2xl text-grey">{stat.icon}</span>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
