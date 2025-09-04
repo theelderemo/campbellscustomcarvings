@@ -91,7 +91,31 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       // Create a unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `product-images/${fileName}`;
+      const filePath = fileName; // Remove the folder prefix to avoid duplication
+
+      // First, let's check if the bucket exists and create it if it doesn't
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error('Error listing buckets:', bucketsError);
+        throw new Error('Unable to access storage');
+      }
+
+      const bucketExists = buckets?.some(bucket => bucket.name === 'product-images');
+      
+      if (!bucketExists) {
+        // Try to create the bucket
+        const { error: createError } = await supabase.storage.createBucket('product-images', {
+          public: true,
+          allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+          fileSizeLimit: 5242880 // 5MB
+        });
+        
+        if (createError) {
+          console.error('Error creating bucket:', createError);
+          throw new Error('Unable to create storage bucket. Please contact admin.');
+        }
+      }
 
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
@@ -114,7 +138,8 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       return publicUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Error uploading image. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Error uploading image. Please try again.';
+      alert(errorMessage);
       return null;
     } finally {
       setUploading(false);
